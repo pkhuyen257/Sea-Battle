@@ -1,6 +1,6 @@
 # Sea Battle: Tactical Command
 
-A C++ console strategy game MVP based on the proposal in `Sea_Battle_Tactical_Command_Proposal_Detailed.pdf`.
+A C++ console strategy game
 
 ## What the game includes
 
