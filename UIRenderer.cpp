@@ -415,8 +415,11 @@ const char* UIRenderer::healthColor(int current, int maximum) const {
 
 std::string UIRenderer::styleBoardLine(const std::string& line) const {
     std::string styled;
+    const bool isHeaderLine = line.find("A") != std::string::npos && line.find("B") != std::string::npos;
     for (char ch : line) {
-        if (ch == '~') {
+        if (((ch >= 'A' && ch <= 'J') || (ch >= '0' && ch <= '9')) && isHeaderLine) {
+            styled += colorize(std::string(1, ch), WHITE, true);
+        } else if (ch == '~') {
             styled += colorize(std::string(1, ch), BLUE, false);
         } else if (ch == 'D' || ch == 'R' || ch == 'C') {
             styled += colorize(std::string(1, ch), GREEN, true);
