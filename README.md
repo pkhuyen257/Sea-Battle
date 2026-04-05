@@ -1,6 +1,6 @@
-# Sea Battle: Command Deck
+# Sea Battle: Tactical Command
 
-`Sea Battle: Command Deck` is a C++ console strategy game where you escort a convoy through dangerous waters, detect enemies with radar, move your ships, and survive enemy attacks.
+A C++ console strategy game MVP based on the proposal in `Sea_Battle_Tactical_Command_Proposal_Detailed.pdf`.
 
 ## What the game includes
 
