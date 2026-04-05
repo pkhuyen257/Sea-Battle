@@ -1,0 +1,15 @@
+# executables
+*.exe
+sea_battle
+
+# object files
+*.o
+
+# save files
+savegame.txt
+
+# system files
+.DS_Store
+
+# vscode
+.vscode/
