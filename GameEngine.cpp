@@ -1,5 +1,6 @@
 #include "GameEngine.h"
 
+#include <algorithm>
 #include <chrono>
 #include <iostream>
 #include <sstream>
@@ -83,6 +84,7 @@ bool GameEngine::loadGame() {
 
 void GameEngine::playActiveMission() {
     while (true) {
+        refreshRadarVision();
         for (const Position& mine : mines_) {
             enemyBoard_.setCell(mine, 'M');
         }
@@ -122,6 +124,7 @@ void GameEngine::playActiveMission() {
 
 void GameEngine::processTurn() {
     enemyBoard_.clearTransientSignals();
+    refreshRadarVision();
 
     bool turnConsumed = false;
     while (!turnConsumed) {
@@ -226,7 +229,7 @@ bool GameEngine::handleRadarScan() {
     uiRenderer_.showActionScreen("SCAN",
                                  {"Enter the center coordinate for a 3x3 scan area",
                                   "",
-                                  "Radar vessel position: " + toCoordinate(radarShip_.getOccupiedCells().front())});
+                                  "You can scan any 3x3 square on the board."});
     uiRenderer_.showMessage("Scan location:", MessageTone::Info);
     Position target;
     if (!parseCoordinate(readLine(), target)) {
@@ -281,7 +284,7 @@ bool GameEngine::handleFireTorpedo() {
     uiRenderer_.showActionScreen("ATTACK",
                                  {"Enter target coordinate",
                                   "",
-                                  "Destroyer range changes with weather conditions."});
+                                  "Destroyer range is slightly longer than before."});
     uiRenderer_.showMessage("Target:", MessageTone::Info);
     Position target;
     if (!parseCoordinate(readLine(), target)) {
@@ -377,6 +380,8 @@ void GameEngine::enemyPhase() {
     enemyManager_.updateEnemies(destroyer_, radarShip_, convoy_, mines_, missionLog_, randomEngine_, weather_);
 
     enemyBoard_.clearSymbol('M');
+    enemyBoard_.clearTransientSignals();
+    refreshRadarVision();
     for (const Position& mine : mines_) {
         enemyBoard_.setCell(mine, 'M');
     }
@@ -469,6 +474,27 @@ void GameEngine::updateWeather() {
     }
 }
 
+void GameEngine::refreshRadarVision() {
+    if (!radarShip_.isAlive()) {
+        return;
+    }
+
+    const Position center = radarShip_.getOccupiedCells().front();
+    const std::vector<Position> visibleArea = getArea(center, 1);
+
+    for (const Ship& enemy : enemyManager_.enemies()) {
+        if (!enemy.isAlive()) {
+            continue;
+        }
+
+        const Position enemyPosition = enemy.getOccupiedCells().front();
+        if (std::find(visibleArea.begin(), visibleArea.end(), enemyPosition) != visibleArea.end() &&
+            enemyBoard_.getCell(enemyPosition) == '~') {
+            enemyBoard_.setCell(enemyPosition, '?');
+        }
+    }
+}
+
 void GameEngine::addLog(const std::string& entry) {
     missionLog_.push_front(entry);
     while (missionLog_.size() > 5) {
@@ -483,7 +509,7 @@ void GameEngine::pauseForEnter() const {
 }
 
 bool GameEngine::canUseTorpedoAt(const Position& target) const {
-    const int destroyerRange = weather_ == "Fog" ? 3 : 4;
+    const int destroyerRange = weather_ == "Fog" ? 4 : 5;
     const int radarRange = weather_ == "Fog" ? 2 : 3;
 
     if (destroyer_.isAlive() &&
@@ -495,8 +521,7 @@ bool GameEngine::canUseTorpedoAt(const Position& target) const {
 }
 
 bool GameEngine::canScanAt(const Position& target) const {
-    const int range = weather_ == "Storm" ? 3 : 4;
-    return manhattanDistance(radarShip_.getOccupiedCells().front(), target) <= range;
+    return enemyBoard_.isValidCoordinate(target);
 }
 
 bool GameEngine::canDeployMineAt(const Position& target) const {

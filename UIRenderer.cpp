@@ -181,6 +181,11 @@ void UIRenderer::showHelp() const {
     lines.push_back("- Protect the Convoy at all times.");
     lines.push_back("- End turn to let enemies and weather update.");
     lines.push_back("");
+    lines.push_back("Friendly ship roles:");
+    lines.push_back("- Radar Ship can spot enemies in the 3x3 area around it.");
+    lines.push_back("- Radar Scan can check any 3x3 square on the board.");
+    lines.push_back("- Destroyer still has the longer torpedo range.");
+    lines.push_back("");
     lines.push_back("Enemy rules:");
     lines.push_back("- Enemies can only chase or attack ships they can see.");
     lines.push_back("- Each enemy does one thing: attack if in range,");
@@ -233,6 +238,9 @@ void UIRenderer::showMissionBriefing(const Mission& mission,
     lines.push_back("- Patrol Boat: fast scout, light damage");
     lines.push_back("- Raider: main attacker, convoy threat");
     lines.push_back("- Submarine: harder to detect, long-range danger");
+    lines.push_back("");
+    lines.push_back("Radar Ship bonus: 3x3 sight and board-wide 3x3 scan.");
+    lines.push_back("Destroyer bonus: longer torpedo range.");
     printPanel("MISSION BRIEFING", lines, MessageTone::Info);
     std::cout << colorize("Press ENTER to deploy fleet...", GREEN, true) << '\n';
 }
@@ -366,6 +374,8 @@ void UIRenderer::printActions() const {
     std::vector<std::string> lines;
     lines.push_back("[1] Move Ship   [2] Radar Scan   [3] Fire Torpedo");
     lines.push_back("[4] Deploy Mine [5] End Turn     [6] Save Game");
+    lines.push_back("Radar Ship: 3x3 sight, scan any 3x3 area");
+    lines.push_back("Destroyer: longer torpedo range");
     printPanel("COMMAND OPTIONS", lines, MessageTone::Info);
 }
 
@@ -377,6 +387,7 @@ void UIRenderer::printEnemyIntel() const {
     lines.push_back("Patrol Boat  Sight 3  Range 2  Dmg 1");
     lines.push_back("Raider       Sight 4  Range 3  Dmg 2");
     lines.push_back("Submarine    Sight 3  Range 4  Dmg 2");
+    lines.push_back("Radar Ship also spots enemies in nearby 3x3 area.");
     lines.push_back("Tip: keep Destroyer close to Convoy.");
     printPanel("THREAT ANALYSIS", lines, MessageTone::Warning);
 }

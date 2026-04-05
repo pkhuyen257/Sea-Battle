@@ -48,6 +48,7 @@ private:
     void enemyPhase();
     void advanceConvoy();
     void updateWeather();
+    void refreshRadarVision();
     void addLog(const std::string& entry);
     void pauseForEnter() const;
     std::string currentThreatLevel() const;

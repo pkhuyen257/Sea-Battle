@@ -2,6 +2,8 @@
 
 A C++ console strategy game
 
+For a player-focused guide, see [INSTRUCTION_MANUAL.md](D:/HKU/COMP2113/Sea%20Battle%20Game/INSTRUCTION_MANUAL.md).
+
 ## What the game includes
 
 - Console UI with a naval command-deck style
