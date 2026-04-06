@@ -53,7 +53,7 @@ private:
                      int score,
                      const std::string& threatLevel) const;
     void printBoardSection(const std::string& title, const std::vector<std::string>& lines) const;
-    void printStatus(const std::vector<Ship>& friendlyShips) const;
+    void printStatus(const std::vector<Ship>& friendlyShips, const std::string& weather) const;
     void printActions() const;
     void printEnemyIntel() const;
     void printLog(const std::deque<std::string>& missionLog) const;

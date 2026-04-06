@@ -144,8 +144,19 @@ void GameEngine::processTurn() {
             turnConsumed = true;
         } else if (action == "6") {
             saveGame();
+        } else if (action == "7") {
+            uiRenderer_.showHelp();
+            pauseForEnter();
+            uiRenderer_.renderGame(mission_,
+                                   turnNumber_,
+                                   weather_,
+                                   score_,
+                                   currentThreatLevel(),
+                                   enemyBoard_,
+                                   friendlyShips(),
+                                   missionLog_);
         } else {
-            uiRenderer_.showMessage("Invalid action. Enter a number from 1 to 6.", MessageTone::Warning);
+            uiRenderer_.showMessage("Invalid action. Enter a number from 1 to 7.", MessageTone::Warning);
         }
     }
 

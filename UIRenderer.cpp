@@ -165,43 +165,54 @@ void UIRenderer::showMainMenu() const {
 void UIRenderer::showHelp() const {
     clearScreen();
     std::vector<std::string> lines;
-    lines.push_back("Goal: Keep the convoy alive until the mission ends.");
+    lines.push_back("Goal:");
+    lines.push_back("- Keep the convoy alive.");
+    lines.push_back("- Help it reach the safe zone before time runs out.");
     lines.push_back("");
-    lines.push_back("Each turn, choose one action:");
-    lines.push_back("1. Move Ship");
-    lines.push_back("2. Radar Scan");
-    lines.push_back("3. Fire Torpedo");
-    lines.push_back("4. Deploy Mine");
-    lines.push_back("5. End Turn");
-    lines.push_back("6. Save Game");
+    lines.push_back("Your ships:");
+    lines.push_back("- Destroyer: attack enemies and place mines.");
+    lines.push_back("- Radar Ship: spot nearby enemies and scan the map.");
+    lines.push_back("- Convoy: moves forward automatically and must survive.");
     lines.push_back("");
-    lines.push_back("Simple flow:");
-    lines.push_back("- Use Radar Ship to detect enemies.");
-    lines.push_back("- Move Destroyer to intercept threats.");
-    lines.push_back("- Protect the Convoy at all times.");
-    lines.push_back("- End turn to let enemies and weather update.");
+    lines.push_back("What happens each turn:");
+    lines.push_back("1. You choose one action.");
+    lines.push_back("2. Your action happens right away.");
+    lines.push_back("3. The convoy moves.");
+    lines.push_back("4. Enemies take their turn.");
+    lines.push_back("5. Weather may change.");
     lines.push_back("");
-    lines.push_back("Friendly ship roles:");
-    lines.push_back("- Radar Ship can spot enemies in the 3x3 area around it.");
-    lines.push_back("- Radar Scan can check any 3x3 square on the board.");
-    lines.push_back("- Destroyer still has the longer torpedo range.");
+    lines.push_back("Your actions:");
+    lines.push_back("1. Move Ship   - move Destroyer or Radar Ship");
+    lines.push_back("2. Radar Scan  - scan any 3x3 area on the board");
+    lines.push_back("3. Fire Torpedo - attack one coordinate");
+    lines.push_back("4. Deploy Mine - place a trap near the destroyer");
+    lines.push_back("5. End Turn    - skip your action");
+    lines.push_back("6. Save Game   - save your progress");
     lines.push_back("");
-    lines.push_back("Enemy rules:");
-    lines.push_back("- Enemies can only chase or attack ships they can see.");
-    lines.push_back("- Each enemy does one thing: attack if in range,");
-    lines.push_back("  otherwise move 1 tile toward a visible ship.");
-    lines.push_back("- No diagonal movement.");
-    lines.push_back("- If they see nothing, they patrol left.");
-    lines.push_back("- Mines explode on contact.");
+    lines.push_back("Radar Ship:");
+    lines.push_back("- It can spot enemies in the 3x3 area around it.");
+    lines.push_back("- It can scan any 3x3 square on the board.");
     lines.push_back("");
-    lines.push_back("Enemy guide:");
+    lines.push_back("Enemies:");
+    lines.push_back("- They can only chase or attack ships they can see.");
+    lines.push_back("- If they see nothing, they move left.");
+    lines.push_back("- Each enemy does only one thing each turn:");
+    lines.push_back("  attack if in range, otherwise move 1 tile.");
+    lines.push_back("- They do not move diagonally.");
+    lines.push_back("");
+    lines.push_back("Enemy types:");
     lines.push_back("- Patrol Boat: sight 3, range 2, damage 1");
     lines.push_back("- Raider: sight 4, range 3, damage 2");
     lines.push_back("- Submarine: sight 3, range 4, damage 2");
     lines.push_back("");
+    lines.push_back("Useful tips:");
+    lines.push_back("- Keep the destroyer close to the convoy.");
+    lines.push_back("- Scan the path ahead, not random places.");
+    lines.push_back("- Raiders and submarines are the biggest threats.");
+    lines.push_back("");
     lines.push_back("Symbols:");
     lines.push_back("~ Water   D Destroyer   R Radar Ship   C Convoy");
-    lines.push_back("X Hit     o Miss        ? Signal       M Mine");
+    lines.push_back("X Hit     o Miss        ? Detected     M Mine");
     printPanel("HOW TO PLAY", lines, MessageTone::Info);
 }
 
@@ -259,7 +270,7 @@ void UIRenderer::renderGame(const Mission& mission,
 
     Board helper;
     printBoardSection("YOUR FLEET", helper.renderFriendlyBoard(friendlyShips));
-    printStatus(friendlyShips);
+    printStatus(friendlyShips, weather);
     printActions();
     printEnemyIntel();
     printLog(missionLog);
@@ -353,13 +364,26 @@ void UIRenderer::printBoardSection(const std::string& title, const std::vector<s
     printPanel(title, styledLines, MessageTone::Info);
 }
 
-void UIRenderer::printStatus(const std::vector<Ship>& friendlyShips) const {
+void UIRenderer::printStatus(const std::vector<Ship>& friendlyShips, const std::string& weather) const {
     std::vector<std::string> lines;
     for (const Ship& ship : friendlyShips) {
         std::ostringstream line;
         line << std::left << std::setw(12) << ship.name()
-             << " HP: " << ship.hp() << "/" << ship.maxHp() << "  "
-             << hpBar(ship.hp(), ship.maxHp());
+             << " HP " << ship.hp() << "/" << ship.maxHp();
+
+        std::string sight = "0";
+        std::string range = "0";
+
+        if (ship.role() == ShipRole::Destroyer) {
+            range = std::to_string(weather == "Fog" ? 4 : 5);
+        } else if (ship.role() == ShipRole::RadarShip) {
+            sight = "3x3";
+            range = std::to_string(weather == "Fog" ? 2 : 3);
+        }
+
+        line << "  " << hpBar(ship.hp(), ship.maxHp())
+             << "  Sight " << sight
+             << "  Range " << range;
         lines.push_back(colorize(
             line.str(),
             toneColor(ship.hp() <= ship.maxHp() / 3 ? MessageTone::Danger
@@ -374,8 +398,7 @@ void UIRenderer::printActions() const {
     std::vector<std::string> lines;
     lines.push_back("[1] Move Ship   [2] Radar Scan   [3] Fire Torpedo");
     lines.push_back("[4] Deploy Mine [5] End Turn     [6] Save Game");
-    lines.push_back("Radar Ship: 3x3 sight, scan any 3x3 area");
-    lines.push_back("Destroyer: longer torpedo range");
+    lines.push_back("[7] How To Play");
     printPanel("COMMAND OPTIONS", lines, MessageTone::Info);
 }
 

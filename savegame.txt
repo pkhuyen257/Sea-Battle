@@ -1,8 +1,8 @@
 SEA_BATTLE_SAVE_V1
 1 0 0
-Clear
+Fog
 Protect the Supply Convoy
-Survive 8 turns and escort the convoy to the safe zone.
+Last 8 turns and escort the convoy to the safe zone.
 8
 10 10
 ~~~~~~~~~~
@@ -33,7 +33,7 @@ C 6 6 0 1 3
 3
 Patrol Boat
 P 2 2 1 0 1
-2 8
+1 5
 3
 Patrol Boat
 P 2 2 1 0 1
@@ -41,12 +41,12 @@ P 2 2 1 0 1
 4
 Raider
 A 3 3 1 0 1
-4 8
+5 5
 5
 Submarine
 S 2 2 1 0 1
-2 9
+1 7
 0
 2
-Task force deployed. Escort the convoy through hostile waters.
-Weather update: Clear.
+Fleet deployed. Escort the convoy through dangerous waters.
+Weather update: Fog.
